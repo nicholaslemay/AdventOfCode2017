@@ -1,5 +1,45 @@
-abcde fghij
-abcde xyz ecdab
-a ab abc abd abf abj
-iiii oiii ooii oooi oooo
-oiii ioii iioi iiio
+class Debugger{
+  
+  constructor(memory_blocks){
+    this.encountered_states = [];
+    this.memory_blocks = memory_blocks;
+    this.encountered_states.push(memory_blocks.slice(0));
+    this.cycles = 0;
+    this.number_of_banks = this.memory_blocks.length;
+  }
+  
+  find_loop(){
+    while(!this.encountered_states.some(this.equivalent)){
+      var bank_to_distribute = this.bank_with_most_blocks();
+      this.distribute(bank_to_distribute);
+      this.encountered_states.push(this.memory_blocks.slice(0));
+      this.cycles++;
+    }
+    return this.cycles;
+  }
+  
+  bank_with_most_blocks(){
+    let max = Math.max.apply(Math, this.memory_blocks)
+    let position = this.memory_blocks.indexOf(max);
+    return {value: max, position: position};
+  }
+  
+  distribute(bank){
+
+    while(bank.value > 0 ){
+      this.memory_blocks[bank.position++ % this.number_of_banks]++;
+      bank--;
+    }
+  }
+  
+  equivalent(current_element, index, array){
+    function equal_to_current_element(other_element,other_index,array) {
+       var equivalent = index !== other_index && current_element.length == other_element.length && current_element.every((v,i)=> v === other_element[i]);
+       return equivalent;
+    }
+    return array.some(equal_to_current_element);
+  }
+  
+}
+new Debugger([0,2,7,0]).find_loop();
+//new Debugger([10,3,15,10,5,15,5,15,9,2,5,8,5,2,3,6]).find_loop();
